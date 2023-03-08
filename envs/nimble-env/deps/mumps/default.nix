@@ -1,9 +1,4 @@
-{
-  pkgs ? import (fetchTarball {
-    url = "https://github.com/NixOS/nixpkgs/archive/c326033c381ae71ed5a81cc07c6619017d4bfff4.tar.gz";
-    sha256 = "1bpni1bnlj8v5d7277msv8yxcvggnmx7cfcl38l0pvz6nghs9pk3";
-  }) {}
-}:
+{ stdenv, pkgs }:
 with pkgs;
 let
   rev = "5fcdbba365286dddbe7df0dfec38c63610058f40";
@@ -39,13 +34,14 @@ in stdenv.mkDerivation rec{
   '';
 
   # configure
-  preConfigure = ''
+  # only need to set on mac
+  preConfigure = if system == "aarch64-darwin" then ''
     export FC=$(which gfortran)
     echo "FC=$FC"
-  '';
-  configureFlags = [
+  '' else null;
+  configureFlags = if system == "aarch64-darwin" then [
     "ADD_FCFLAGS=-fallow-argument-mismatch"
-  ];
+  ] else null;
 
   # install
   postInstall = ''
