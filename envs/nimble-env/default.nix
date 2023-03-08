@@ -1,9 +1,11 @@
 {}:
 let
+  # nixpkgs snapshot for Ubuntu 20.04 (glibc >= 2.31)
   pkgs_ = import (fetchTarball {
     url = "https://github.com/NixOS/nixpkgs/archive/2c162d49cd5b979eb66ff1653aecaeaa01690fcc.tar.gz";
     sha256 = "sha256:08k7jy14rlpbb885x8dyds5pxr2h64mggfgil23vgyw6f1cn9kz6";
   }) {};
+  # nixpkgs snapshot for macOS
   pkgs = if pkgs_.system == "aarch64-darwin" then
     import (fetchTarball {
       url = "https://github.com/NixOS/nixpkgs/archive/c326033c381ae71ed5a81cc07c6619017d4bfff4.tar.gz";
@@ -68,24 +70,24 @@ in stdenv.mkDerivation {
     which
     cmake
     (if pkgs.system == "aarch64-darwin" then assimp
-     else (callPackage deps/assimp { pkgs=pkgs; stdenv = stdenv; }))
+     else (callPackage deps/assimp { pkgs = pkgs; stdenv = stdenv; }))
     boost
-    gfortran
     gcc
     eigen
     pkgconfig
     openssl
-    lapack-reference
     console-bridge
     urdfdom
     urdfdom-headers
-    (callPackage deps/mumps { pkgs=pkgs; stdenv = stdenv; })
-    (callPackage deps/ipopt { pkgs=pkgs; stdenv = stdenv; })
-    (callPackage deps/libccd { pkgs=pkgs; stdenv = stdenv; })
-    (callPackage deps/tinyxml { pkgs=pkgs; stdenv = stdenv; })
-    (callPackage deps/tinyxml2 { pkgs=pkgs; stdenv = stdenv; })
-    (callPackage deps/ezc3d { pkgs=pkgs; stdenv = stdenv; })
-    (callPackage deps/grpc { pkgs=pkgs; stdenv = stdenv; })
+    (if pkgs.system == "aarch64-darwin" then libccd
+     else (callPackage deps/libccd { pkgs = pkgs; stdenv = stdenv; }))
+    (if pkgs.system == "aarch64-darwin" then libxcrypt else null)
+    (callPackage deps/mumps { pkgs = pkgs; stdenv = stdenv; })
+    (callPackage deps/ipopt { pkgs = pkgs; stdenv = stdenv; })
+    (callPackage deps/tinyxml { pkgs = pkgs; stdenv = stdenv; })
+    (callPackage deps/tinyxml2 { pkgs = pkgs; stdenv = stdenv; })
+    (callPackage deps/ezc3d { pkgs = pkgs; stdenv = stdenv; })
+    (callPackage deps/grpc { pkgs = pkgs; stdenv = stdenv; })
     python.pkgs.pybind11
     gbenchmark
     gtest
