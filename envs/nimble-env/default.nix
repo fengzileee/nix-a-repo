@@ -73,7 +73,7 @@ in stdenv.mkDerivation {
      else (callPackage deps/assimp { pkgs = pkgs; stdenv = stdenv; }))
     boost
     gcc
-    eigen
+    (callPackage deps/eigen { pkgs = pkgs; stdenv = stdenv; })
     pkgconfig
     openssl
     console-bridge
