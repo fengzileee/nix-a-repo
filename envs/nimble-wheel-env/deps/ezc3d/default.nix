@@ -13,9 +13,9 @@ stdenv.mkDerivation rec {
   };
 
   # install
-  postInstall = if pkgs.system == "aarch64-darwin" then ''
+  postInstall = ''
     ln -s $out/lib/ezc3d/libezc3d.dylib $out/lib/libezc3d.dylib
-  '' else null;
+  '';
 
   # dependency
   nativeBuildInputs = [

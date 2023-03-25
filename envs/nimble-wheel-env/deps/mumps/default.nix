@@ -41,7 +41,7 @@ in stdenv.mkDerivation rec{
   '' else null;
   configureFlags = if system == "aarch64-darwin" then [
     "ADD_FCFLAGS=-fallow-argument-mismatch"
-  ] else [];
+  ] else null;
 
   # install
   postInstall = ''

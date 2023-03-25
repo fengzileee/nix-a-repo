@@ -1,4 +1,4 @@
-{ pkgs ? import <nixpkgs> {}, stdenv ? (import <nixpkgs> {}).stdenv }:
+{ pkgs, stdenv }:
 with pkgs;
 stdenv.mkDerivation rec {
   pname = "eigen";

@@ -1,10 +1,12 @@
-{ pkgs ? import <nixpkgs> {}, stdenv ? (import <nixpkgs> {}).stdenv }:
+{ stdenv, pkgs }:
 with pkgs;
 let
+  # grpc-rev = "ee5b762f33a42170144834f5ab7efda9d76c480b";
   grpc-rev = "11f00485aa5ad422cfe2d9d90589158f46954101";
   protobuf-rev = "2514f0bd7da7e2af1bed4c5d1b84f031c4d12c10";
 in stdenv.mkDerivation rec{
   pname = "grpc-protobuf_3_14_0";
+  # version = "1.33.2";
   version = "1.42.0";
   enableParallelBuilding = true;
   build-cores = 8;
@@ -13,6 +15,7 @@ in stdenv.mkDerivation rec{
     (fetchgit {
       url = https://github.com/grpc/grpc;
       rev = "${grpc-rev}";
+      # sha256 = "sha256-nm31NjczAOQA43Qt3r1265RIoheVjpkwyPnZM5TzhzE=";
       sha256 = "sha256-9/ywbnvd8hqeblFe+X9SM6PkRPB/yqE8Iw9TNmLMSOE=";
       fetchSubmodules = true;
     })
@@ -44,7 +47,7 @@ in stdenv.mkDerivation rec{
   cmakeFlags = [
     "-DgRPC_INSTALL=ON"
     "-DgRPC_BUILD_TESTS=OFF"
-    "-DCMAKE_CXX_FLAGS=\"-Wno-format-security\""
+    "-DCMAKE_COMPILE_WARNING_AS_ERROR=OFF"
     (if pkgs.system == "aarch64-darwin"
      then "-DCMAKE_CXX_FLAGS=\"-fvisibility=hidden\""
      else null)

@@ -1,9 +1,16 @@
 {}:
 let
-  pkgs = import (fetchTarball {
+  # nixpkgs snapshot for Ubuntu 20.04 (glibc >= 2.31)
+  pkgs_ = import (fetchTarball {
+    url = "https://github.com/NixOS/nixpkgs/archive/2c162d49cd5b979eb66ff1653aecaeaa01690fcc.tar.gz";
+    sha256 = "sha256:08k7jy14rlpbb885x8dyds5pxr2h64mggfgil23vgyw6f1cn9kz6";
+  }) {};
+  # nixpkgs snapshot for macOS
+  pkgs = if pkgs_.system == "aarch64-darwin" then
+    import (fetchTarball {
       url = "https://github.com/NixOS/nixpkgs/archive/c326033c381ae71ed5a81cc07c6619017d4bfff4.tar.gz";
       sha256 = "1bpni1bnlj8v5d7277msv8yxcvggnmx7cfcl38l0pvz6nghs9pk3";
-    }) {};
+    }) {} else pkgs_;
   python = pkgs.python38;
   my_py_pkgs =
     rec {
@@ -47,7 +54,6 @@ let
     };
   pythonEnv = python.withPackages (ps: with ps; [
     pip
-    virtualenv
     pytest
     numpy
     my_py_pkgs.delocate
@@ -57,7 +63,7 @@ let
     wheel
   ]);
   stdenv = if pkgs.system == "aarch64-darwin" then pkgs.stdenv
-           else pkgs.gcc9Stdenv;
+           else pkgs.gcc8Stdenv;
 in stdenv.mkDerivation {
   name = "nimble-env";
   buildInputs = with pkgs; [
@@ -65,7 +71,8 @@ in stdenv.mkDerivation {
     cmake
     (if pkgs.system == "aarch64-darwin" then assimp
      else (callPackage deps/assimp { pkgs = pkgs; stdenv = stdenv; }))
-    (boost165.override { inherit stdenv; })
+    boost
+    gcc
     (callPackage deps/eigen { pkgs = pkgs; stdenv = stdenv; })
     pkgconfig
     openssl
@@ -74,7 +81,7 @@ in stdenv.mkDerivation {
     urdfdom-headers
     (if pkgs.system == "aarch64-darwin" then libccd
      else (callPackage deps/libccd { pkgs = pkgs; stdenv = stdenv; }))
-    libxcrypt
+    (if pkgs.system == "aarch64-darwin" then libxcrypt else null)
     (callPackage deps/mumps { pkgs = pkgs; stdenv = stdenv; })
     (callPackage deps/ipopt { pkgs = pkgs; stdenv = stdenv; })
     (callPackage deps/tinyxml { pkgs = pkgs; stdenv = stdenv; })
@@ -91,13 +98,5 @@ in stdenv.mkDerivation {
   # HACK: for codesign on mac
   shellHook = if pkgs.system == "aarch64-darwin" then ''
     export PATH=$PATH:/usr/bin/
-  '' else ''
-    if ! [ -d ~/.virtualenvs/nimble-nix ]; then
-      if ! [ -d ~/.virtualenvs/ ]; then
-        mkdir ~/.virtualenvs
-      fi
-      python -m venv ~/.virtualenvs/nimble-nix
-    fi
-    . ~/.virtualenvs/nimble-nix/bin/activate
-  '';
+  '' else "";
 }
